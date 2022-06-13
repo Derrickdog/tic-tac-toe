@@ -1,7 +1,6 @@
-//modules
-    //gameBoard object
-        //gameboard array
-    //displayController
+const boxes = document.querySelectorAll(".box");
+boxes.forEach(box => box.addEventListener("click", changeBox));
 
-//factory
-    //players
+function changeBox(e){
+    e.target.textContent = "X";
+}
