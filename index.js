@@ -37,6 +37,36 @@ const gameBoard = (() => {
     return {setBox, getBox, reset};
 })();
 
+//displayController module
+const displayController = (() => {
+    const boxes = document.querySelectorAll(".box");
+    const statusMsg = document.getElementById("statusMsg");
+    const resetBtn = document.getElementById("resetBtn");
+
+    boxes.forEach((box) => box.addEventListener("click", (e) => {
+            gameController.playRound(parseInt(e.target.dataset.index));
+            updateBoard();
+        })
+    );
+    
+    resetBtn.addEventListener("click", () => {
+        gameBoard.reset;
+        setStatusMsg("X Turn");
+    });
+
+    const updateBoard = () => {
+        for(let i = 0; i < boxes.length; i++){
+            boxes[i].textContent = gameBoard.getBox(i);
+        }
+    }
+
+    const setStatusMsg = (message) => {
+        statusMsg.textContent = message;
+    };
+
+    return {setStatusMsg};
+})();
+
 //gameController module
 const gameController = (() => {
     const playerX = Player("X");
@@ -57,9 +87,9 @@ const gameController = (() => {
 
         for(let i = 0; i < winConditions.length; i++){
             const winCondition = winConditions[i];
-            const cell1 = gameBoard.board[winCondition[0]];
-            const cell2 = gameBoard.board[winCondition[1]];
-            const cell3 = gameBoard.board[winCondition[2]];
+            const cell1 = gameBoard.getBox(winCondition[0]);
+            const cell2 = gameBoard.getBox(winCondition[1]);
+            const cell3 = gameBoard.getBox(winCondition[2]);
 
             if(cell1 === "" || cell2 === "" || cell3 === "") continue;
             if(cell1 === cell2 && cell2 === cell3){
@@ -78,13 +108,5 @@ const gameController = (() => {
             //change player
         }
     };
-    
-})();
-
-//displayController module
-const displayController = (() => {
-    
-
 
 })();
-
