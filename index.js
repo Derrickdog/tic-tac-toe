@@ -1,33 +1,9 @@
-//player factory function
-const Player = (turn) => {
-    this.turn = turn;
-    const getTurn = () => {
-        return turn;
-    }
-    return {getTurn};
-}
-
 //gameBoard module
 const gameBoard = (() => {
     const board = ["", "", "", "", "", "", "", "", ""];
-
-    const setBox = (index, sign) => {
-        if(index > board.length) return;
-        board[index] = sign;
-    };
-
-    const getBox = (index) => {
-        if(index > board.length) return;
-        return board[index];
-    };
-
-    const reset = () => {
-        for(let i = 0; i < board.length; i++){
-            board[i] = "";
-        }
-    };
-
-    return {setBox, getBox, reset, board};
+    let currentPlayer = "X";
+    let running = true;
+    return {board, currentPlayer, running};
 })();
 
 //displayController module
@@ -37,46 +13,25 @@ const displayController = (() => {
     const resetBtn = document.getElementById("resetBtn");
 
     boxes.forEach((box) => box.addEventListener("click", (e) => {
-            gameController.playRound(parseInt(e.target.id.charAt(3))-1);
-            updateBoard();
+            const boxIndex = e.target.id.charAt(3);
+            if(gameBoard.board[boxIndex] != "" || !gameBoard.running) return;
+            
+            gameBoard.board[boxIndex] = gameBoard.currentPlayer;
+            e.target.textContent = gameBoard.currentPlayer;
+
+            checkWinner();
         })
     );
-    
+
     resetBtn.addEventListener("click", () => {
-        gameBoard.reset;
-        updateBoard();
-        setStatusMsg("X Turn");
+        gameBoard.board = ["", "", "", "", "", "", "", "", ""];
+        gameBoard.currentPlayer = "X";
+        statusMsg.textContent = gameBoard.currentPlayer + " Turn";
+        boxes.forEach(box => box.textContent = "");
+        gameBoard.running = true;
     });
 
-    const updateBoard = () => {
-        for(let i = 0; i < boxes.length; i++){
-            boxes[i].textContent = gameBoard.board[i];
-        }
-    }
-
-    const setStatusMsg = (message) => {
-        statusMsg.textContent = message;
-    };
-
-    return {setStatusMsg};
-})();
-
-//gameController module
-const gameController = (() => {
-    const playerX = Player("X");
-    const playerO = Player("O");
-    let round = 1;
-
-    const playRound = (index) => {
-        gameBoard.setBox(index, getCurrentTurn());
-        checkWin();
-    };
-
-    const getCurrentTurn = () => {
-        return round % 2 === 1 ? playerX.getTurn() : playerO.getTurn();
-    }
-
-    const checkWin = (index) => {
+    const checkWinner = () => {
         const winConditions = [
             [0, 1, 2],
             [3, 4, 5],
@@ -91,9 +46,9 @@ const gameController = (() => {
 
         for(let i = 0; i < winConditions.length; i++){
             const winCondition = winConditions[i];
-            const cell1 = gameBoard.getBox(winCondition[0]);
-            const cell2 = gameBoard.getBox(winCondition[1]);
-            const cell3 = gameBoard.getBox(winCondition[2]);
+            const cell1 = gameBoard.board[winCondition[0]];
+            const cell2 = gameBoard.board[winCondition[1]];
+            const cell3 = gameBoard.board[winCondition[2]];
 
             if(cell1 === "" || cell2 === "" || cell3 === "") continue;
             if(cell1 === cell2 && cell2 === cell3){
@@ -103,18 +58,20 @@ const gameController = (() => {
         }
 
         if(gameWon){
-            displayController.setStatusMsg("X Wins!");
-            round = 1;
+            statusMsg.textContent = gameBoard.currentPlayer + " Wins!";
+            gameBoard.running = false;
         }
         else if(!gameBoard.board.includes("")){
-            displayController.setStatusMsg("Draw!");
-            round = 1;
+            statusMsg.textContent = "Draw!";
+            gameBoard.running = false;
         }
         else{
-            round++;
-            displayController.setStatusMsg(getCurrentTurn() + " Turn");
+            changePlayer();
         }
-    };
+    }
 
-    return { playRound, getCurrentTurn };
+    const changePlayer = () => {
+        gameBoard.currentPlayer = (gameBoard.currentPlayer === "X") ? "O" : "X";
+        statusMsg.textContent = gameBoard.currentPlayer + " Turn";
+    }
 })();
